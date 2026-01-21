@@ -1,0 +1,40 @@
+{
+  "name": "Rocky Linux 10",
+  "slug": "rocky10",
+  "categories": [
+    2
+  ],
+  "date_created": "2025-01-21",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "interface_port": null,
+  "documentation": null,
+  "website": "https://rockylinux.org/",
+  "logo": "https://raw.githubusercontent.com/rocky-linux/brand-kit/47a9c09f66e9139380ba48b8c8f004e0992d5e30/Logomark.svg",
+  "config_path": "",
+  "description": "Rocky Linux is a community enterprise operating system designed to be 100% bug-for-bug compatible with Red Hat Enterprise Linux®",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/rocky10.sh",
+      "resources": {
+        "cpu": 1,
+        "ram": 512,
+        "hdd": 2,
+        "os": "rocky",
+        "version": "10"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "To Update Rocky Linux: `dnf -y update`",
+      "type": "info"
+    }
+  ]
+}
