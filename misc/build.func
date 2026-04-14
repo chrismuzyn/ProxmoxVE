@@ -4148,6 +4148,115 @@ EOF
         install_exit_code=1
       fi
     }
+  elif [ "$var_os" == "rockylinux" ]; then
+    sleep 3
+    LANG=${LANG:-en_US.UTF-8}
+    pct exec "$CTID" -- bash -c "if command -v localectl >/dev/null 2>&1; then localectl set-locale LANG=${LANG}; elif [ -f /etc/locale.conf ]; then sed -i \"s/^LANG=.*/LANG=${LANG}/\" /etc/locale.conf; else echo \"LANG=${LANG}\" >/etc/locale.conf; fi"
+
+    if [[ -z "${tz:-}" ]]; then
+      tz=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "UTC")
+    fi
+    [[ "${tz:-}" == Etc/* ]] && tz="UTC"
+
+    if pct exec "$CTID" -- test -e "/usr/share/zoneinfo/$tz"; then
+      pct exec "$CTID" -- bash -c "tz='$tz'; ln -sf \"/usr/share/zoneinfo/\$tz\" /etc/localtime && echo \"\$tz\" >/etc/timezone 2>/dev/null || true"
+    else
+      msg_warn "Skipping timezone setup – zone '$tz' not found in container"
+    fi
+
+    if ! pct exec "$CTID" -- bash -c "getent hosts dl.rockylinux.org >/dev/null 2>&1"; then
+      msg_warn "DNF repository DNS resolution failed in container, injecting public DNS servers"
+      pct exec "$CTID" -- bash -c "echo -e 'nameserver 8.8.8.8\nnameserver 1.1.1.1' >/etc/resolv.conf"
+    fi
+
+    pct exec "$CTID" -- bash -c "dnf install -y sudo curl mc gnupg2 jq 2>&1" >>"$BUILD_LOG" 2>&1 || {
+      msg_warn "dnf install failed, trying alternate mirrors..."
+      local rocky_exit=0
+      pct exec "$CTID" -- bash -c '
+        DNF_BASE="sudo curl mc gnupg2 jq"
+        DISTRO=$(. /etc/os-release 2>/dev/null && echo "$ID" || echo "rockylinux")
+
+        if [ "$DISTRO" = "rockylinux" ]; then
+          ROCKY_MIRRORS="dl.rockylinux.org mirror.rackspace.com download-ib01.fedoraproject.org rocky-linux-us-west1.production.gcp.mirrors.automotivelinux.org"
+        else
+          ROCKY_MIRRORS="dl.fedoraproject.org download-ib01.fedoraproject.org mirrors.kernel.org"
+        fi
+
+        try_dnf_mirror() {
+          local baseurl="https://$1"
+          local major_ver=$(. /etc/os-release 2>/dev/null && echo "$VERSION_ID" | cut -d. -f1 || echo "9")
+          for repofile in /etc/yum.repos.d/Rocky-*.repo /etc/yum.repos.d/rocky*.repo; do
+            [ -f "$repofile" ] || continue
+            sed -i "s|baseurl=https\?://[^/]*/|baseurl=${baseurl}/|g" "$repofile"
+          done
+          dnf clean all >/dev/null 2>&1
+          local dnf_out
+          dnf_out=$(dnf install -y $DNF_BASE 2>&1)
+          local dnf_rc=$?
+          if [ $dnf_rc -eq 0 ]; then
+            echo "  CDN set to $1: tests passed"
+            return 0
+          else
+            echo "  Mirror $1 failed (dnf install error)"
+            return 1
+          fi
+        }
+
+        scan_reachable() {
+          local result=""
+          for m in $1; do
+            if timeout 2 bash -c "echo >/dev/tcp/$m/80" 2>/dev/null || timeout 2 bash -c "echo >/dev/tcp/$m/443" 2>/dev/null; then
+              result="$result $m"
+            fi
+          done
+          echo "$result" | xargs
+        }
+
+        MIRRORS_OK=$(scan_reachable "$ROCKY_MIRRORS")
+        MIRRORS_PICK=$(printf "%s\n" $MIRRORS_OK | shuf | head -3 | xargs)
+
+        for mirror in $MIRRORS_PICK; do
+          echo "  Attempting mirror: $mirror"
+          try_dnf_mirror "$mirror" && exit 0
+        done
+
+        if timeout 2 bash -c "echo >/dev/tcp/dl.rockylinux.org/443" 2>/dev/null; then
+          echo "  Attempting mirror: dl.rockylinux.org"
+          try_dnf_mirror "dl.rockylinux.org" && exit 0
+        fi
+
+        exit 2
+      ' && rocky_exit=0 || rocky_exit=$?
+      if [[ $rocky_exit -eq 2 ]]; then
+        msg_warn "Multiple mirrors failed (possible CDN synchronization issue)."
+        msg_warn "Find Rocky Linux mirrors at: https://mirrors.rockylinux.org/mirrormanager/mirrors"
+        local custom_mirror=""
+        while true; do
+          read -rp "  Enter a mirror hostname (or 'skip' to abort): " custom_mirror </dev/tty
+          [[ -z "$custom_mirror" ]] && continue
+          [[ "$custom_mirror" == "skip" ]] && break
+          [[ ! "$custom_mirror" =~ ^[a-zA-Z0-9._-]+$ ]] && {
+            msg_warn "Invalid hostname format."
+            continue
+          }
+          pct exec "$CTID" -- bash -c "
+            for repofile in /etc/yum.repos.d/Rocky-*.repo /etc/yum.repos.d/rocky*.repo; do
+              [ -f \"\$repofile\" ] && sed -i \"s|baseurl=https\?://[^/]*/|baseurl=https://${custom_mirror}/|g\" \"\$repofile\"
+            done
+            dnf clean all >/dev/null 2>&1
+            dnf install -y sudo curl mc gnupg2 jq >/dev/null 2>&1
+          " && break
+          msg_warn "Mirror '${custom_mirror}' also failed. Try another or type 'skip'."
+        done
+        if [[ "$custom_mirror" == "skip" ]]; then
+          msg_error "dnf base packages installation failed"
+          install_exit_code=1
+        fi
+      elif [[ $rocky_exit -ne 0 ]]; then
+        msg_error "dnf base packages installation failed"
+        install_exit_code=1
+      fi
+    }
   else
     sleep 3
     LANG=${LANG:-en_US.UTF-8}

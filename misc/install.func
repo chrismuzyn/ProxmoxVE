@@ -29,8 +29,14 @@
 
 if ! command -v curl >/dev/null 2>&1; then
   printf "\r\e[2K%b" '\033[93m Setup Source \033[m' >&2
-  apt update >/dev/null 2>&1
-  apt install -y curl >/dev/null 2>&1
+  if command -v dnf >/dev/null 2>&1; then
+    dnf install -y curl >/dev/null 2>&1
+  elif command -v apt-get >/dev/null 2>&1; then
+    apt-get update >/dev/null 2>&1
+    apt-get install -y curl >/dev/null 2>&1
+  elif command -v apk >/dev/null 2>&1; then
+    apk add curl >/dev/null 2>&1
+  fi
 fi
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/core.func)
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/error_handler.func)
@@ -463,8 +469,10 @@ motd_ssh() {
   echo -e "echo -e \"${TAB}${HOSTNAME}${YW} Hostname: ${GN}\$(hostname)${CL}\"" >>"$PROFILE_FILE"
   echo -e "echo -e \"${TAB}${INFO}${YW} IP Address: ${GN}\$(hostname -I | awk '{print \$1}')${CL}\"" >>"$PROFILE_FILE"
 
-  # Disable default MOTD scripts
-  chmod -x /etc/update-motd.d/*
+  # Disable default MOTD scripts (Debian/Ubuntu only)
+  if [[ -d /etc/update-motd.d ]]; then
+    chmod -x /etc/update-motd.d/*
+  fi
 
   if [[ "${SSH_ROOT}" == "yes" ]]; then
     sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
