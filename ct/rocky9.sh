@@ -10,7 +10,7 @@ var_tags="${var_tags:-os}"
 var_cpu="${var_cpu:-1}"
 var_ram="${var_ram:-512}"
 var_disk="${var_disk:-2}"
-var_os="${var_os:-rocky}"
+var_os="${var_os:-rockylinux}"
 var_version="${var_version:-9}"
 var_unprivileged="${var_unprivileged:-1}"
 
