@@ -10,7 +10,10 @@ verb_ip6
 catch_errors
 setting_up_container
 network_check
-update_os
+
+msg_info "Updating Container OS"
+$STD dnf -y update
+msg_ok "Updated Container OS"
 
 msg_info "Installing Dependencies"
 $STD dnf install -y sudo
@@ -18,4 +21,8 @@ msg_ok "Installed Dependencies"
 
 motd_ssh
 customize
-cleanup_lxc
+
+msg_info "Cleaning up"
+$STD dnf -y autoremove 2>/dev/null || true
+$STD dnf -y clean all 2>/dev/null || true
+msg_ok "Cleaned"
