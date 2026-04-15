@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/chrismuzyn/ProxmoxVE/chris-rocky/misc/build.func)
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: Chris Muzyn (chrismuzyn)
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
@@ -13,6 +13,7 @@ var_disk="${var_disk:-2}"
 var_os="${var_os:-rockylinux}"
 var_version="${var_version:-9}"
 var_unprivileged="${var_unprivileged:-1}"
+var_install="rocky9-install"
 
 header_info "$APP"
 variables
