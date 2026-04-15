@@ -135,7 +135,7 @@ setting_up_container() {
     exit 121
   fi
   rm -rf /usr/lib/python3.*/EXTERNALLY-MANAGED
-  systemctl disable -q --now systemd-networkd-wait-online.service
+  systemctl list-unit-files systemd-networkd-wait-online.service &>/dev/null && systemctl disable -q --now systemd-networkd-wait-online.service
   msg_ok "Set up Container OS"
   #msg_custom "${CM}" "${GN}" "Network Connected: ${BL}$(hostname -I)"
   msg_ok "Network Connected: ${BL}$(hostname -I)"
