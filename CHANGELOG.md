@@ -442,15 +442,47 @@ Exercise vigilance regarding copycat or coat-tailing sites that seek to exploit 
 
 </details>
 
+## 2026-04-15
+
+### 🆕 New Scripts
+
+  - GitHub-Runner ([#13709](https://github.com/community-scripts/ProxmoxVE/pull/13709))
+- Revert "Remove low-install-count CT scripts and installers (#13570)" [@CrazyWolf13](https://github.com/CrazyWolf13) ([#13752](https://github.com/community-scripts/ProxmoxVE/pull/13752))
+
+### 🚀 Updated Scripts
+
+  - #### 🐞 Bug Fixes
+
+    - Domain Monitor: Fix file ownership after update [@tremor021](https://github.com/tremor021) ([#13759](https://github.com/community-scripts/ProxmoxVE/pull/13759))
+
+  - #### 💥 Breaking Changes
+
+    - Reitti: refactor scripts for v4 - remove RabbitMQ and Photon [@MickLesk](https://github.com/MickLesk) ([#13728](https://github.com/community-scripts/ProxmoxVE/pull/13728))
+
+### 📚 Documentation
+
+  - cleanup: remove docs/, update README & CONTRIBUTING, fix repo config [@MickLesk](https://github.com/MickLesk) ([#13770](https://github.com/community-scripts/ProxmoxVE/pull/13770))
+
 ## 2026-04-14
 
 ### 🚀 Updated Scripts
+
+  - Immich: Pin photo-processing library revisions [@vhsdream](https://github.com/vhsdream) ([#13748](https://github.com/community-scripts/ProxmoxVE/pull/13748))
 
   - #### 🐞 Bug Fixes
 
     - BentoPDF: Nginx fixes [@tremor021](https://github.com/tremor021) ([#13741](https://github.com/community-scripts/ProxmoxVE/pull/13741))
     - Zerobyte: add git to dependencies to fix bun install failure [@Copilot](https://github.com/Copilot) ([#13721](https://github.com/community-scripts/ProxmoxVE/pull/13721))
     - alpine-nextcloud-install: do not use deprecated nginx config [@AlexanderStein](https://github.com/AlexanderStein) ([#13726](https://github.com/community-scripts/ProxmoxVE/pull/13726))
+
+  - #### ✨ New Features
+
+    - Mealie: support v3.15+ Nuxt 4 migration [@MickLesk](https://github.com/MickLesk) ([#13731](https://github.com/community-scripts/ProxmoxVE/pull/13731))
+
+  - #### 🔧 Refactor
+
+    - Lyrion: correct service name and version file in update script [@MickLesk](https://github.com/MickLesk) ([#13734](https://github.com/community-scripts/ProxmoxVE/pull/13734))
+    - Changedetection: move env vars from service file to .env [@tremor021](https://github.com/tremor021) ([#13732](https://github.com/community-scripts/ProxmoxVE/pull/13732))
 
 ## 2026-04-13
 
