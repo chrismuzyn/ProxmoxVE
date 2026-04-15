@@ -13,10 +13,10 @@ var_disk="${var_disk:-2}"
 var_os="${var_os:-rockylinux}"
 var_version="${var_version:-9}"
 var_unprivileged="${var_unprivileged:-1}"
-var_install="rocky9-install"
 
 header_info "$APP"
 variables
+var_install="rocky9-install"
 color
 catch_errors
 
